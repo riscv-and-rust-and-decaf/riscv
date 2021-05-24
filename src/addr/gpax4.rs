@@ -4,6 +4,7 @@ use core::convert::TryInto;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GPAddrSv32X4(u64);
+
 impl Address for GPAddrSv32X4 {
     fn new(addr: usize) -> Self {
         Self::new_u64(addr as u64)
@@ -21,6 +22,7 @@ impl Address for GPAddrSv32X4 {
         GPAddrSv32X4((self.0 >> 12) << 12)
     }
 }
+
 impl VirtualAddress for GPAddrSv32X4 {
     unsafe fn as_mut<'a, 'b, T>(&'a self) -> &'b mut T {
         &mut *(self.0 as *mut T)
@@ -31,7 +33,6 @@ impl AddressL2 for GPAddrSv32X4 {
     fn p2_index(&self) -> usize {
         self.0.get_bits(22..34) as usize
     }
-
     fn p1_index(&self) -> usize {
         self.0.get_bits(12..22) as usize
     }
@@ -61,6 +62,7 @@ impl AddressX64 for GPAddrSv32X4 {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GPAddrSv39X4(u64);
+
 impl Address for GPAddrSv39X4 {
     fn new(addr: usize) -> Self {
         GPAddrSv39X4(addr.try_into().unwrap())
@@ -78,6 +80,7 @@ impl Address for GPAddrSv39X4 {
         GPAddrSv39X4((self.0 >> 12) << 12)
     }
 }
+
 impl VirtualAddress for GPAddrSv39X4 {
     unsafe fn as_mut<'a, 'b, T>(&'a self) -> &'b mut T {
         &mut *(self.0 as *mut T)
@@ -91,7 +94,6 @@ impl AddressL3 for GPAddrSv39X4 {
     fn p2_index(&self) -> usize {
         self.0.get_bits(21..30) as usize
     }
-
     fn p1_index(&self) -> usize {
         self.0.get_bits(12..21) as usize
     }
@@ -130,6 +132,7 @@ impl AddressX64 for GPAddrSv39X4 {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct GPAddrSv48X4(u64);
+
 impl Address for GPAddrSv48X4 {
     fn new(addr: usize) -> Self {
         GPAddrSv48X4(addr.try_into().unwrap())
@@ -147,6 +150,7 @@ impl Address for GPAddrSv48X4 {
         GPAddrSv48X4((self.0 >> 12) << 12)
     }
 }
+
 impl VirtualAddress for GPAddrSv48X4 {
     unsafe fn as_mut<'a, 'b, T>(&'a self) -> &'b mut T {
         &mut *(self.0 as *mut T)
@@ -157,14 +161,12 @@ impl AddressL4 for GPAddrSv48X4 {
     fn p4_index(&self) -> usize {
         self.0.get_bits(39..50) as usize
     }
-
     fn p3_index(&self) -> usize {
         self.0.get_bits(30..39) as usize
     }
     fn p2_index(&self) -> usize {
         self.0.get_bits(21..30) as usize
     }
-
     fn p1_index(&self) -> usize {
         self.0.get_bits(12..21) as usize
     }

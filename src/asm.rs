@@ -74,7 +74,6 @@ pub unsafe fn sfence_vma(asid: usize, addr: usize) {
     }
 }
 
-#[cfg(feature = "hypervisor")]
 mod hypervisor_extension {
     // Generating instructions for Hypervisor extension.
     // There are two kinds of instructions: rs1/rs2 type and rs1/rd type.
@@ -150,5 +149,4 @@ mod hypervisor_extension {
     instruction_hypervisor_extension!(RS1_RS2,,hsv_d,".word 1857372275",__hsv_d);
 }
 
-#[cfg(feature = "hypervisor")]
 pub use self::hypervisor_extension::*;

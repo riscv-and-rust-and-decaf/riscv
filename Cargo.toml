@@ -13,9 +13,9 @@ bare-metal = "0.2.5"
 bitflags = "1.0"
 bit_field = "0.10.0"
 log = "0.4"
+
 [build-dependencies]
 riscv-target = "0.1.2"
 
 [features]
 inline-asm = []
-hypervisor = []

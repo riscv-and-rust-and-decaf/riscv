@@ -1,10 +1,12 @@
 use addr::*;
 use core::convert::TryInto;
 use core::fmt::{Debug, Error, Formatter};
+use core::marker::PhantomData;
 use core::ops::{Index, IndexMut};
 
 pub type Entries32 = [PageTableEntryX32; RV32_ENTRY_COUNT];
 pub type Entries64 = [PageTableEntryX64; RV64_ENTRY_COUNT];
+
 // To avoid const generic.
 pub trait PTEIterableSlice<T> {
     fn to_pte_slice<'a>(&'a self) -> &'a [T];
@@ -55,28 +57,6 @@ impl<T: PTEIterableSlice<E>, E: PTE> PageTableWith<T, E> {
             entry.set_unused();
         }
     }
-
-    /// Parameter `frame` is the actual physical frame where the root page table resides,
-    ///  it can be anywhere in the main memory.
-    /// Denote `recursive_index` by K, then virtual address of the root page table is
-    ///  (K, K+1, 0) in Sv32, and (K, K, K+1, 0) in Sv39, and (K, K, K, K+1, 0) in Sv48.
-    pub fn set_recursive<F: PhysicalAddress>(
-        &mut self,
-        recursive_index: usize,
-        frame: FrameWith<F>,
-    ) {
-        self[recursive_index].set(frame.clone(), EF::VALID);
-        self[recursive_index + 1].set(frame.clone(), EF::VALID | EF::READABLE | EF::WRITABLE);
-    }
-
-    /// Setup identity map for the page with first level page table index.
-    #[cfg(riscv32)]
-    pub fn map_identity(&mut self, p2idx: usize, flags: PageTableFlags) {
-        self.entries.pte_index_mut(p2idx).set(
-            FrameWith::of_addr(PhysAddrSv32::new_u64((p2idx as u64) << 22)),
-            flags,
-        );
-    }
 }
 
 impl<T: PTEIterableSlice<E>, E: PTE> Index<usize> for PageTableWith<T, E> {
@@ -118,6 +98,7 @@ pub trait PTE {
     fn set<T: PhysicalAddress>(&mut self, frame: FrameWith<T>, flags: PageTableFlags);
     fn flags_mut(&mut self) -> &mut PageTableFlags;
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PageTableEntryX32(u32);
@@ -197,7 +178,7 @@ impl PTE for PageTableEntryX64 {
         unsafe { &mut *(self as *mut _ as *mut PageTableFlags) }
     }
 }
-use core::marker::PhantomData;
+
 pub struct PageTableEntryX64Printer<'a, P: PhysicalAddress>(
     &'a PageTableEntryX64,
     PhantomData<*const P>,

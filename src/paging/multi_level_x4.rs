@@ -1,8 +1,8 @@
 use crate::addr::*;
 use crate::asm::{hfence_gvma, hfence_vvma};
+use crate::paging::mapper::MapperFlushable;
 use crate::paging::multi_level::Rv32PageTableWith;
 use crate::paging::multi_level::{Rv39PageTableWith, Rv48PageTableWith};
-use crate::paging::recursive::MapperFlushable;
 
 #[must_use = "Guest Physical Address Table changes must be flushed or ignored."]
 pub struct MapperFlushGPA(usize);
@@ -16,7 +16,6 @@ impl MapperFlushable for MapperFlushGPA {
             hfence_gvma(self.0, 0);
         }
     }
-
     fn ignore(self) {}
 }
 
@@ -32,7 +31,6 @@ impl MapperFlushable for MapperFlushGPT {
             hfence_vvma(self.0, 0);
         }
     }
-
     fn ignore(self) {}
 }
 

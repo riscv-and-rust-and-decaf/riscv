@@ -100,7 +100,5 @@ pub use self::mhpmeventx::*;
 // TODO: Debug Mode Registers
 
 // Hypervisor Extension Registers
-#[cfg(all(target_arch = "riscv64", feature = "hypervisor"))]
 mod hypervisorx64;
-#[cfg(all(target_arch = "riscv64", feature = "hypervisor"))]
 pub use self::hypervisorx64::*;
