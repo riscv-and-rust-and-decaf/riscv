@@ -17,7 +17,7 @@ impl Address for VirtAddrSv48 {
         self.0.try_into().unwrap()
     }
     fn page_number(&self) -> usize {
-        self.0.get_bits(12..64).try_into().unwrap()
+        self.0.get_bits(12..48).try_into().unwrap()
     }
     fn page_offset(&self) -> usize {
         self.0.get_bits(0..12) as usize
@@ -54,10 +54,10 @@ impl AddressL4 for VirtAddrSv48 {
         let p2_index = p2_index as u64;
         let p1_index = p1_index as u64;
         let offset = offset as u64;
-        assert!(p4_index.get_bits(10..) == 0, "p4_index exceeding 9 bits");
-        assert!(p3_index.get_bits(10..) == 0, "p3_index exceeding 9 bits");
-        assert!(p2_index.get_bits(10..) == 0, "p2_index exceeding 9 bits");
-        assert!(p1_index.get_bits(10..) == 0, "p1_index exceeding 9 bits");
+        assert!(p4_index.get_bits(9..) == 0, "p4_index exceeding 9 bits");
+        assert!(p3_index.get_bits(9..) == 0, "p3_index exceeding 9 bits");
+        assert!(p2_index.get_bits(9..) == 0, "p2_index exceeding 9 bits");
+        assert!(p1_index.get_bits(9..) == 0, "p1_index exceeding 9 bits");
         assert!(offset.get_bits(12..) == 0, "offset exceeding 12 bits");
         let mut addr = (p4_index << 12 << 9 << 9 << 9)
             | (p3_index << 12 << 9 << 9)
@@ -65,7 +65,7 @@ impl AddressL4 for VirtAddrSv48 {
             | (p1_index << 12)
             | offset;
         if addr.get_bit(47) {
-            addr.set_bits(48..64, 0xFFFF);
+            addr.set_bits(48..64, (1 << (64 - 48)) - 1);
         } else {
             addr.set_bits(48..64, 0x0000);
         }
@@ -96,7 +96,10 @@ impl Address for PhysAddrSv48 {
 impl AddressX64 for VirtAddrSv48 {
     fn new_u64(addr: u64) -> Self {
         if addr.get_bit(47) {
-            assert!(addr.get_bits(48..64) == 0xFFFF, "va 48..64 is not sext");
+            assert!(
+                addr.get_bits(48..64) == (1 << (64 - 48)) - 1,
+                "va 48..64 is not sext"
+            );
         } else {
             assert!(addr.get_bits(48..64) == 0x0000, "va 48..64 is not sext");
         }

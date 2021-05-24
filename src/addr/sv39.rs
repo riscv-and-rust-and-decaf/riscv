@@ -17,7 +17,7 @@ impl Address for VirtAddrSv39 {
         self.0.try_into().unwrap()
     }
     fn page_number(&self) -> usize {
-        self.0.get_bits(12..64).try_into().unwrap()
+        self.0.get_bits(12..39).try_into().unwrap()
     }
     fn page_offset(&self) -> usize {
         self.0.get_bits(0..12) as usize
@@ -48,14 +48,14 @@ impl AddressL3 for VirtAddrSv39 {
         let p2_index = p2_index as u64;
         let p1_index = p1_index as u64;
         let offset = offset as u64;
-        assert!(p3_index.get_bits(12..) == 0, "p3_index exceeding 11 bits");
-        assert!(p2_index.get_bits(10..) == 0, "p2_index exceeding 9 bits");
-        assert!(p1_index.get_bits(10..) == 0, "p1_index exceeding 9 bits");
+        assert!(p3_index.get_bits(11..) == 0, "p3_index exceeding 11 bits");
+        assert!(p2_index.get_bits(9..) == 0, "p2_index exceeding 9 bits");
+        assert!(p1_index.get_bits(9..) == 0, "p1_index exceeding 9 bits");
         assert!(offset.get_bits(12..) == 0, "offset exceeding 12 bits");
         let mut addr =
             (p3_index << 12 << 9 << 9) | (p2_index << 12 << 9) | (p1_index << 12) | offset;
         if addr.get_bit(38) {
-            addr.set_bits(39..64, 0xFFFF);
+            addr.set_bits(39..64, (1 << (64 - 39)) - 1);
         } else {
             addr.set_bits(39..64, 0x0000);
         }
@@ -86,7 +86,10 @@ impl Address for PhysAddrSv39 {
 impl AddressX64 for VirtAddrSv39 {
     fn new_u64(addr: u64) -> Self {
         if addr.get_bit(38) {
-            assert!(addr.get_bits(39..64) == 0xFFFF, "va 39..64 is not sext");
+            assert!(
+                addr.get_bits(39..64) == (1 << (64 - 39)) - 1,
+                "va 39..64 is not sext"
+            );
         } else {
             assert!(addr.get_bits(39..64) == 0x0000, "va 39..64 is not sext");
         }
